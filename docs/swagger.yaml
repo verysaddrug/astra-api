@@ -1,0 +1,208 @@
+basePath: /
+definitions:
+  model.APIError:
+    properties:
+      code:
+        type: integer
+      text:
+        type: string
+    type: object
+  model.APIResponse:
+    properties:
+      data: {}
+      error:
+        $ref: '#/definitions/model.APIError'
+      response: {}
+    type: object
+  model.AuthRequest:
+    properties:
+      login:
+        example: TestUser01
+        type: string
+      pswd:
+        example: Qwerty123!
+        type: string
+    type: object
+  model.RegisterRequest:
+    properties:
+      login:
+        example: TestUser01
+        type: string
+      pswd:
+        example: Qwerty123!
+        type: string
+      token:
+        example: supersecrettoken
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: verysaddrug@icloud.com
+    name: мой email
+  description: REST API для хранения и раздачи документов с кэшированием
+  title: Astra API
+  version: "1.0"
+paths:
+  /api/auth:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Данные
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/model.AuthRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.APIResponse'
+      summary: Логин
+      tags:
+      - auth
+  /api/auth/{token}:
+    delete:
+      parameters:
+      - description: Токен
+        in: path
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.APIResponse'
+      summary: Логаут
+      tags:
+      - auth
+  /api/docs:
+    get:
+      parameters:
+      - description: Токен
+        in: query
+        name: token
+        required: true
+        type: string
+      - description: Логин
+        in: query
+        name: login
+        type: string
+      - description: Лимит
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.APIResponse'
+      summary: Список документов
+      tags:
+      - docs
+    post:
+      consumes:
+      - multipart/form-data
+      parameters:
+      - description: Токен
+        in: query
+        name: token
+        required: true
+        type: string
+      - description: Метаданные
+        in: formData
+        name: meta
+        required: true
+        type: string
+      - description: Файл
+        in: formData
+        name: file
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.APIResponse'
+      summary: Загрузка документа
+      tags:
+      - docs
+  /api/docs/{id}:
+    delete:
+      parameters:
+      - description: Токен
+        in: query
+        name: token
+        required: true
+        type: string
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.APIResponse'
+      summary: Удалить документ
+      tags:
+      - docs
+    get:
+      parameters:
+      - description: Токен
+        in: query
+        name: token
+        required: true
+        type: string
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.APIResponse'
+      summary: Документ по id
+      tags:
+      - docs
+  /api/register:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Данные
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/model.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.APIResponse'
+      summary: Регистрация
+      tags:
+      - auth
+schemes:
+- http
+swagger: "2.0"
