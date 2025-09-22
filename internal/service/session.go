@@ -1,37 +1,41 @@
 package service
 
 import (
+	"astra-api/internal/model"
 	"sync"
 	"time"
 
 	"github.com/google/uuid"
 )
 
-type Session struct {
-	Token   string
-	UserID  string
-	Login   string
-	Created time.Time
-}
-
 type SessionService struct {
 	mu       sync.RWMutex
-	sessions map[string]Session
+	sessions map[string]model.Session
 }
 
 func NewSessionService() *SessionService {
-	return &SessionService{sessions: make(map[string]Session)}
+	return &SessionService{sessions: make(map[string]model.Session)}
 }
 
 func (s *SessionService) Create(userID, login string) string {
 	token := uuid.New().String()
 	s.mu.Lock()
-	s.sessions[token] = Session{Token: token, UserID: userID, Login: login, Created: time.Now()}
+	s.sessions[token] = model.Session{Token: token, UserID: userID, Login: login, Created: time.Now()}
 	s.mu.Unlock()
 	return token
 }
 
-func (s *SessionService) Validate(token string) (Session, bool) {
+func (s *SessionService) Get(token string) (*model.Session, bool) {
+	s.mu.RLock()
+	sess, ok := s.sessions[token]
+	s.mu.RUnlock()
+	if !ok {
+		return nil, false
+	}
+	return &sess, true
+}
+
+func (s *SessionService) Validate(token string) (model.Session, bool) {
 	s.mu.RLock()
 	sess, ok := s.sessions[token]
 	s.mu.RUnlock()

@@ -30,7 +30,11 @@ import (
 func main() {
 	cfg := initConfig()
 	db := initDB(cfg, 10, 3*time.Second)
-	migrate(db)
+	if cfg.AutoMigrate {
+		migrate(db)
+	} else {
+		log.Println("Auto-migration disabled. Use AUTO_MIGRATE=true to enable automatic migrations.")
+	}
 	userRepo := repository.NewUserRepository(db)
 	authService := service.NewAuthService(userRepo, cfg.AdminToken)
 	sessionService := service.NewSessionService()
