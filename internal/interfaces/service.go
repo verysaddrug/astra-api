@@ -20,5 +20,6 @@ type DocsServiceInterface interface {
 type SessionServiceInterface interface {
 	Create(userID, login string) string
 	Get(token string) (*model.Session, bool)
+	Validate(token string) (model.Session, bool)
 	Delete(token string) bool
 }

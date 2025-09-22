@@ -4,9 +4,7 @@ import (
 	"astra-api/internal/interfaces"
 	"astra-api/internal/model"
 	"context"
-	"log"
 	"net/http"
-	"time"
 )
 
 // ContextKey represents a key used for context values

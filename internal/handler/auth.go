@@ -1,19 +1,19 @@
 package handler
 
 import (
+	"astra-api/internal/interfaces"
 	"astra-api/internal/model"
-	"astra-api/internal/service"
 	"encoding/json"
 	"net/http"
 	"strings"
 )
 
 type AuthHandler struct {
-	authService    *service.AuthService
-	sessionService *service.SessionService
+	authService    interfaces.AuthServiceInterface
+	sessionService interfaces.SessionServiceInterface
 }
 
-func NewAuthHandler(authService *service.AuthService, sessionService *service.SessionService) *AuthHandler {
+func NewAuthHandler(authService interfaces.AuthServiceInterface, sessionService interfaces.SessionServiceInterface) *AuthHandler {
 	return &AuthHandler{authService: authService, sessionService: sessionService}
 }
 

@@ -1,0 +1,24 @@
+# Compiled binary
+astra-api
+
+# Environment files
+.env
+
+# Logs
+*.log
+
+# Uploads directory (generated content)
+uploads/
+
+# Go mod cache
+go.sum
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
