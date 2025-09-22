@@ -37,24 +37,24 @@ func main() {
 	} else {
 		log.Println("Auto-migration disabled. Use AUTO_MIGRATE=true to enable automatic migrations.")
 	}
-	
+
 	// Initialize repositories (implementing interfaces)
 	var userRepo interfaces.UserRepositoryInterface = repository.NewUserRepository(db)
 	var docRepo interfaces.DocumentRepositoryInterface = repository.NewDocumentRepository(db)
-	
+
 	// Initialize services (implementing interfaces)
 	var authService interfaces.AuthServiceInterface = service.NewAuthService(userRepo, cfg.AdminToken)
 	var sessionService interfaces.SessionServiceInterface = service.NewSessionService()
 	var docsService interfaces.DocsServiceInterface = service.NewDocsService(docRepo)
-	
+
 	// Initialize handlers
 	authHandler := handler.NewAuthHandler(authService, sessionService)
 	cache := cache.NewCache(5 * time.Minute)
 	docsHandler := handler.NewDocsHandler(docsService, cache, sessionService, userRepo)
-	
+
 	// Initialize middleware
 	authMiddleware := middleware.NewAuthMiddleware(sessionService, userRepo)
-	
+
 	routes(authHandler, docsHandler, authMiddleware)
 	log.Println("Server started on :8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
@@ -105,7 +105,7 @@ func routes(authHandler *handler.AuthHandler, docsHandler *handler.DocsHandler, 
 		middleware.LoggingMiddleware,
 		middleware.CORSMiddleware,
 	)
-	
+
 	// Public routes (no auth required)
 	http.HandleFunc("/api/register", baseMiddleware(authHandler.Register))
 	http.HandleFunc("/api/auth", func(w http.ResponseWriter, r *http.Request) {

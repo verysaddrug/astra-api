@@ -22,12 +22,12 @@ func LoadConfig(envFile string) *Config {
 	if err != nil {
 		log.Printf("Не удалось загрузить файл окружения %s: %v", envFile, err)
 	}
-	
+
 	autoMigrate := false
 	if os.Getenv("AUTO_MIGRATE") == "true" {
 		autoMigrate = true
 	}
-	
+
 	return &Config{
 		DBHost:      os.Getenv("DB_HOST"),
 		DBPort:      os.Getenv("DB_PORT"),

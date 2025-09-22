@@ -13,7 +13,7 @@ type ContextKey string
 const (
 	// UserContextKey is the key for storing user in context
 	UserContextKey ContextKey = "user"
-	// SessionContextKey is the key for storing session in context  
+	// SessionContextKey is the key for storing session in context
 	SessionContextKey ContextKey = "session"
 )
 
@@ -55,7 +55,7 @@ func (m *AuthMiddleware) RequireAuth(next http.HandlerFunc) http.HandlerFunc {
 		// Add user and session to context
 		ctx := context.WithValue(r.Context(), UserContextKey, user)
 		ctx = context.WithValue(ctx, SessionContextKey, session)
-		
+
 		next.ServeHTTP(w, r.WithContext(ctx))
 	}
 }
