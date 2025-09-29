@@ -2,6 +2,7 @@ package repository
 
 import (
 	"astra-api/internal/model"
+	"database/sql"
 
 	"github.com/jmoiron/sqlx"
 )
@@ -16,6 +17,11 @@ func NewUserRepository(db *sqlx.DB) *UserRepository {
 
 func (r *UserRepository) Create(user *model.User) error {
 	_, err := r.db.Exec(`INSERT INTO users (id, login, password, created_at) VALUES ($1, $2, $3, $4)`, user.ID, user.Login, user.Password, user.CreatedAt)
+	return err
+}
+
+func (r *UserRepository) CreateTx(tx *sql.Tx, user *model.User) error {
+	_, err := tx.Exec(`INSERT INTO users (id, login, password, created_at) VALUES ($1, $2, $3, $4)`, user.ID, user.Login, user.Password, user.CreatedAt)
 	return err
 }
 

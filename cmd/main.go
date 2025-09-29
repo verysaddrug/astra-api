@@ -5,6 +5,8 @@ import (
 	"astra-api/internal/config"
 	"astra-api/internal/handler"
 	. "astra-api/internal/handler"
+	"astra-api/internal/interfaces"
+	"astra-api/internal/middleware"
 	"astra-api/internal/repository"
 	"astra-api/internal/service"
 	"fmt"
@@ -30,16 +32,30 @@ import (
 func main() {
 	cfg := initConfig()
 	db := initDB(cfg, 10, 3*time.Second)
-	migrate(db)
-	userRepo := repository.NewUserRepository(db)
-	authService := service.NewAuthService(userRepo, cfg.AdminToken)
-	sessionService := service.NewSessionService()
+	if cfg.AutoMigrate {
+		migrate(db)
+	} else {
+		log.Println("Auto-migration disabled. Use AUTO_MIGRATE=true to enable automatic migrations.")
+	}
+
+	// Initialize repositories (implementing interfaces)
+	var userRepo interfaces.UserRepositoryInterface = repository.NewUserRepository(db)
+	var docRepo interfaces.DocumentRepositoryInterface = repository.NewDocumentRepository(db)
+
+	// Initialize services (implementing interfaces)
+	var authService interfaces.AuthServiceInterface = service.NewAuthService(userRepo, cfg.AdminToken)
+	var sessionService interfaces.SessionServiceInterface = service.NewSessionService()
+	var docsService interfaces.DocsServiceInterface = service.NewDocsService(docRepo)
+
+	// Initialize handlers
 	authHandler := handler.NewAuthHandler(authService, sessionService)
-	docRepo := repository.NewDocumentRepository(db)
-	docsService := service.NewDocsService(docRepo)
 	cache := cache.NewCache(5 * time.Minute)
 	docsHandler := handler.NewDocsHandler(docsService, cache, sessionService, userRepo)
-	routes(authHandler, docsHandler)
+
+	// Initialize middleware
+	authMiddleware := middleware.NewAuthMiddleware(sessionService, userRepo)
+
+	routes(authHandler, docsHandler, authMiddleware)
 	log.Println("Server started on :8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
@@ -83,24 +99,48 @@ func migrate(db *sqlx.DB) {
 	log.Println("Migrations applied successfully")
 }
 
-func routes(authHandler *handler.AuthHandler, docsHandler *handler.DocsHandler) {
-	http.HandleFunc("/api/register", authHandler.Register)
-	http.HandleFunc("/api/auth", authHandler.Auth)
-	http.HandleFunc("/api/auth/", func(w http.ResponseWriter, r *http.Request) {
+func routes(authHandler *handler.AuthHandler, docsHandler *handler.DocsHandler, authMiddleware *middleware.AuthMiddleware) {
+	// Base middleware for all routes
+	baseMiddleware := middleware.ChainMiddleware(
+		middleware.LoggingMiddleware,
+		middleware.CORSMiddleware,
+	)
+
+	// Public routes (no auth required)
+	http.HandleFunc("/api/register", baseMiddleware(authHandler.Register))
+	http.HandleFunc("/api/auth", func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
+		case http.MethodPost:
+			baseMiddleware(authHandler.Auth)(w, r)
 		case http.MethodDelete:
-			authHandler.Logout(w, r)
+			baseMiddleware(authHandler.Logout)(w, r)
 		default:
 			WriteError(w, 405, "method not allowed")
 		}
 	})
 
+	http.HandleFunc("/api/auth/", func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case http.MethodDelete:
+			baseMiddleware(authHandler.Logout)(w, r)
+		default:
+			WriteError(w, 405, "method not allowed")
+		}
+	})
+
+	// Protected routes (auth required)
+	protectedMiddleware := middleware.ChainMiddleware(
+		middleware.LoggingMiddleware,
+		middleware.CORSMiddleware,
+		authMiddleware.RequireAuth,
+	)
+
 	http.HandleFunc("/api/docs", func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case http.MethodPost:
-			docsHandler.Upload(w, r)
+			protectedMiddleware(docsHandler.Upload)(w, r)
 		case http.MethodGet, http.MethodHead:
-			docsHandler.List(w, r)
+			protectedMiddleware(docsHandler.List)(w, r)
 		default:
 			WriteError(w, 405, "method not allowed")
 		}
@@ -109,9 +149,9 @@ func routes(authHandler *handler.AuthHandler, docsHandler *handler.DocsHandler) 
 	http.HandleFunc("/api/docs/", func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case http.MethodGet, http.MethodHead:
-			docsHandler.GetByID(w, r)
+			protectedMiddleware(docsHandler.GetByID)(w, r)
 		case http.MethodDelete:
-			docsHandler.DeleteByID(w, r)
+			protectedMiddleware(docsHandler.DeleteByID)(w, r)
 		default:
 			WriteError(w, 405, "method not allowed")
 		}

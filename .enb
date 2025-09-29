@@ -4,3 +4,5 @@ DB_USER=postgres
 DB_PASSWORD=postgres
 DB_NAME=astra
 ADMIN_TOKEN=supersecrettoken
+# Автоматические миграции при старте (по умолчанию отключены для безопасности в продакшне)
+AUTO_MIGRATE=false

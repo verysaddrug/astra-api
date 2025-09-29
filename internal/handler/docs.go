@@ -2,9 +2,8 @@ package handler
 
 import (
 	"astra-api/internal/cache"
+	"astra-api/internal/interfaces"
 	"astra-api/internal/model"
-	"astra-api/internal/repository"
-	"astra-api/internal/service"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -15,13 +14,13 @@ import (
 )
 
 type DocsHandler struct {
-	docsService    *service.DocsService
+	docsService    interfaces.DocsServiceInterface
 	cache          *cache.Cache
-	sessionService *service.SessionService
-	userRepo       *repository.UserRepository
+	sessionService interfaces.SessionServiceInterface
+	userRepo       interfaces.UserRepositoryInterface
 }
 
-func NewDocsHandler(docsService *service.DocsService, cache *cache.Cache, sessionService *service.SessionService, userRepo *repository.UserRepository) *DocsHandler {
+func NewDocsHandler(docsService interfaces.DocsServiceInterface, cache *cache.Cache, sessionService interfaces.SessionServiceInterface, userRepo interfaces.UserRepositoryInterface) *DocsHandler {
 	return &DocsHandler{docsService: docsService, cache: cache, sessionService: sessionService, userRepo: userRepo}
 }
 

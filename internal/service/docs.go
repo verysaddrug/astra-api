@@ -1,18 +1,18 @@
 package service
 
 import (
+	"astra-api/internal/interfaces"
 	"astra-api/internal/model"
-	"astra-api/internal/repository"
 	"time"
 
 	"github.com/google/uuid"
 )
 
 type DocsService struct {
-	docRepo *repository.DocumentRepository
+	docRepo interfaces.DocumentRepositoryInterface
 }
 
-func NewDocsService(docRepo *repository.DocumentRepository) *DocsService {
+func NewDocsService(docRepo interfaces.DocumentRepositoryInterface) *DocsService {
 	return &DocsService{docRepo: docRepo}
 }
 

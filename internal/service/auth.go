@@ -1,8 +1,8 @@
 package service
 
 import (
+	"astra-api/internal/interfaces"
 	"astra-api/internal/model"
-	"astra-api/internal/repository"
 	"errors"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
@@ -12,11 +12,11 @@ import (
 )
 
 type AuthService struct {
-	userRepo   *repository.UserRepository
+	userRepo   interfaces.UserRepositoryInterface
 	adminToken string
 }
 
-func NewAuthService(userRepo *repository.UserRepository, adminToken string) *AuthService {
+func NewAuthService(userRepo interfaces.UserRepositoryInterface, adminToken string) *AuthService {
 	return &AuthService{userRepo: userRepo, adminToken: adminToken}
 }
 
