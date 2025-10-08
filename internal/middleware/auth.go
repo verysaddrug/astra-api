@@ -1,7 +1,8 @@
 package middleware
 
 import (
-	"astra-api/internal/interfaces"
+	"astra-api/internal/repository"
+	"astra-api/internal/service"
 	"context"
 	"net/http"
 )
@@ -18,12 +19,12 @@ const (
 
 // AuthMiddleware provides authentication middleware
 type AuthMiddleware struct {
-	sessionService interfaces.SessionServiceInterface
-	userRepo       interfaces.UserRepositoryInterface
+	sessionService service.SessionServiceInterface
+	userRepo       repository.UserRepositoryInterface
 }
 
 // NewAuthMiddleware creates a new authentication middleware
-func NewAuthMiddleware(sessionService interfaces.SessionServiceInterface, userRepo interfaces.UserRepositoryInterface) *AuthMiddleware {
+func NewAuthMiddleware(sessionService service.SessionServiceInterface, userRepo repository.UserRepositoryInterface) *AuthMiddleware {
 	return &AuthMiddleware{
 		sessionService: sessionService,
 		userRepo:       userRepo,
