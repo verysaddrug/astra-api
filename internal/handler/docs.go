@@ -205,7 +205,10 @@ func (h *DocsHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 				w.Header().Set("Content-Type", doc.Mime)
 				w.Header().Set("Content-Disposition", "attachment; filename="+doc.Name)
 				if r.Method == http.MethodGet {
-					io.Copy(w, f)
+					if _, err := io.Copy(w, f); err != nil {
+						WriteError(w, 500, "failed to stream file")
+						return
+					}
 				}
 				return
 			}
@@ -239,7 +242,10 @@ func (h *DocsHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", doc.Mime)
 		w.Header().Set("Content-Disposition", "attachment; filename="+doc.Name)
 		if r.Method == http.MethodGet {
-			io.Copy(w, f)
+			if _, err := io.Copy(w, f); err != nil {
+				WriteError(w, 500, "failed to stream file")
+				return
+			}
 		}
 		return
 	}

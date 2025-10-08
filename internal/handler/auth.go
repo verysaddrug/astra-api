@@ -95,11 +95,15 @@ func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 
 func WriteError(w http.ResponseWriter, code int, text string) {
 	w.WriteHeader(code)
-	json.NewEncoder(w).Encode(&model.APIResponse{Error: &model.APIError{Code: code, Text: text}})
+	if err := json.NewEncoder(w).Encode(&model.APIResponse{Error: &model.APIError{Code: code, Text: text}}); err != nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+	}
 }
 
 func WriteResponse(w http.ResponseWriter, resp *model.APIResponse) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
-	json.NewEncoder(w).Encode(resp)
+	if err := json.NewEncoder(w).Encode(resp); err != nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+	}
 }
