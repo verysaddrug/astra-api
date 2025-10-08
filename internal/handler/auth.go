@@ -85,6 +85,10 @@ func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	token := parts[3]
+	if token == "" {
+		WriteError(w, 400, "missing token")
+		return
+	}
 	ok := h.sessionService.Delete(token)
 	if !ok {
 		WriteError(w, 400, "invalid token")

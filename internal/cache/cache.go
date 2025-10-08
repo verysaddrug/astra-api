@@ -20,7 +20,13 @@ func NewCache(ttl time.Duration) *Cache {
 }
 
 func (c *Cache) Set(key string, value interface{}) {
-	c.store.Store(key, CacheItem{Value: value, Expiration: time.Now().Add(c.ttl).UnixNano()})
+	var expiration int64
+	if c.ttl > 0 {
+		expiration = time.Now().Add(c.ttl).UnixNano()
+	} else {
+		expiration = 0 // No expiration
+	}
+	c.store.Store(key, CacheItem{Value: value, Expiration: expiration})
 }
 
 func (c *Cache) Get(key string) (interface{}, bool) {
@@ -29,7 +35,7 @@ func (c *Cache) Get(key string) (interface{}, bool) {
 		return nil, false
 	}
 	ci := item.(CacheItem)
-	if time.Now().UnixNano() > ci.Expiration {
+	if ci.Expiration > 0 && time.Now().UnixNano() > ci.Expiration {
 		c.store.Delete(key)
 		return nil, false
 	}

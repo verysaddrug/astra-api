@@ -1,5 +1,4 @@
 astra-api
-.env
 *.log
 uploads/
 go.sum
@@ -9,3 +8,4 @@ go.sum
 *.swo
 .DS_Store
 coverage.out
+coverage.html

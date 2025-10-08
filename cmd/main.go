@@ -60,7 +60,7 @@ func main() {
 }
 
 func initConfig() *config.Config {
-	cfg := config.LoadConfig(".enb")
+	cfg := config.LoadConfig(".env")
 	if cfg.DBHost == "" || cfg.DBUser == "" || cfg.DBName == "" {
 		log.Fatal("DB config is not set properly")
 	}

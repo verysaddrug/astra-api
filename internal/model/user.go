@@ -29,3 +29,9 @@ type AuthRequest struct {
 	Login string `json:"login" example:"TestUser01"`
 	Pswd  string `json:"pswd" example:"Qwerty123!"`
 }
+
+type UserNotFoundError struct{}
+
+func (e *UserNotFoundError) Error() string {
+	return "user not found"
+}
