@@ -42,6 +42,38 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-go-
 
+      - name: Build
+        run: go build ./...
+
+      - name: Vet
+        run: go vet ./...
+
+  migrate:
+    runs-on: ubuntu-latest
+    needs: build
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: ${{ secrets.DB_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          POSTGRES_DB: ${{ secrets.DB_NAME }}
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U $$POSTGRES_USER"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22.x'
+
       - name: Install goose
         run: go install github.com/pressly/goose/v3/cmd/goose@v3.25.0
 
@@ -54,15 +86,9 @@ jobs:
           GOOSE_DBSTRING: host=localhost port=5432 user=${{ secrets.DB_USER }} password=${{ secrets.DB_PASSWORD }} dbname=${{ secrets.DB_NAME }} sslmode=disable
         run: $(go env GOPATH)/bin/goose -dir ./migrations up
 
-      - name: Build
-        run: go build ./...
-
-      - name: Vet
-        run: go vet ./...
-
   test:
     runs-on: ubuntu-latest
-    needs: build
+    needs: migrate
     steps:
       - name: Checkout
         uses: actions/checkout@v4
