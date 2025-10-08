@@ -1,11 +1,11 @@
-package interfaces
+package repository
 
 import (
 	"astra-api/internal/model"
 	"database/sql"
 )
 
-// UserRepositoryInterface defines the contract for user repository
+// UserRepositoryInterface описывает контракт репозитория пользователей
 type UserRepositoryInterface interface {
 	Create(user *model.User) error
 	CreateTx(tx *sql.Tx, user *model.User) error
@@ -13,7 +13,7 @@ type UserRepositoryInterface interface {
 	GetByID(id string) (*model.User, error)
 }
 
-// DocumentRepositoryInterface defines the contract for document repository
+// DocumentRepositoryInterface описывает контракт репозитория документов
 type DocumentRepositoryInterface interface {
 	Create(doc *model.Document) error
 	CreateTx(tx *sql.Tx, doc *model.Document) error

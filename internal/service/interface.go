@@ -1,14 +1,14 @@
-package interfaces
+package service
 
 import "astra-api/internal/model"
 
-// AuthServiceInterface defines the contract for authentication service
+// AuthServiceInterface описывает контракт сервиса аутентификации
 type AuthServiceInterface interface {
 	Register(login, password, adminToken string) (*model.User, error)
 	Authenticate(login, password string) (*model.User, error)
 }
 
-// DocsServiceInterface defines the contract for document service
+// DocsServiceInterface описывает контракт сервиса документов
 type DocsServiceInterface interface {
 	Create(doc *model.Document) error
 	List(owner string, limit int) ([]model.Document, error)
@@ -16,7 +16,7 @@ type DocsServiceInterface interface {
 	Delete(id string) error
 }
 
-// SessionServiceInterface defines the contract for session service
+// SessionServiceInterface описывает контракт сервиса сессий
 type SessionServiceInterface interface {
 	Create(userID, login string) string
 	Get(token string) (*model.Session, bool)

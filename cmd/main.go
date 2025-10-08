@@ -5,7 +5,6 @@ import (
 	"astra-api/internal/config"
 	"astra-api/internal/handler"
 	. "astra-api/internal/handler"
-	"astra-api/internal/interfaces"
 	"astra-api/internal/middleware"
 	"astra-api/internal/repository"
 	"astra-api/internal/service"
@@ -39,13 +38,13 @@ func main() {
 	}
 
 	// Initialize repositories (implementing interfaces)
-	var userRepo interfaces.UserRepositoryInterface = repository.NewUserRepository(db)
-	var docRepo interfaces.DocumentRepositoryInterface = repository.NewDocumentRepository(db)
+	var userRepo repository.UserRepositoryInterface = repository.NewUserRepository(db)
+	var docRepo repository.DocumentRepositoryInterface = repository.NewDocumentRepository(db)
 
 	// Initialize services (implementing interfaces)
-	var authService interfaces.AuthServiceInterface = service.NewAuthService(userRepo, cfg.AdminToken)
-	var sessionService interfaces.SessionServiceInterface = service.NewSessionService()
-	var docsService interfaces.DocsServiceInterface = service.NewDocsService(docRepo)
+	var authService service.AuthServiceInterface = service.NewAuthService(userRepo, cfg.AdminToken)
+	var sessionService service.SessionServiceInterface = service.NewSessionService()
+	var docsService service.DocsServiceInterface = service.NewDocsService(docRepo)
 
 	// Initialize handlers
 	authHandler := handler.NewAuthHandler(authService, sessionService)
@@ -103,7 +102,6 @@ func routes(authHandler *handler.AuthHandler, docsHandler *handler.DocsHandler, 
 	// Base middleware for all routes
 	baseMiddleware := middleware.ChainMiddleware(
 		middleware.LoggingMiddleware,
-		middleware.CORSMiddleware,
 	)
 
 	// Public routes (no auth required)
@@ -131,7 +129,6 @@ func routes(authHandler *handler.AuthHandler, docsHandler *handler.DocsHandler, 
 	// Protected routes (auth required)
 	protectedMiddleware := middleware.ChainMiddleware(
 		middleware.LoggingMiddleware,
-		middleware.CORSMiddleware,
 		authMiddleware.RequireAuth,
 	)
 

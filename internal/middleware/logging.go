@@ -31,3 +31,14 @@ func (rw *responseWriter) WriteHeader(code int) {
 	rw.statusCode = code
 	rw.ResponseWriter.WriteHeader(code)
 }
+
+// ChainMiddleware composes multiple http.HandlerFunc middlewares into one.
+func ChainMiddleware(middlewares ...func(http.HandlerFunc) http.HandlerFunc) func(http.HandlerFunc) http.HandlerFunc {
+	return func(final http.HandlerFunc) http.HandlerFunc {
+		// apply in reverse so first passed executes first
+		for i := len(middlewares) - 1; i >= 0; i-- {
+			final = middlewares[i](final)
+		}
+		return final
+	}
+}
