@@ -111,6 +111,18 @@ jobs:
       - name: Test
         run: go test ./... -run . -v
 
+      - name: Test Coverage
+        run: |
+          go test ./... -coverprofile=coverage.out -covermode=atomic
+          coverage=$(go tool cover -func=coverage.out | grep total | awk '{print $3}' | sed 's/%//')
+          echo "Coverage: ${coverage}%"
+          if (( $(echo "$coverage < 50" | bc -l) )); then
+            echo "::warning::Test coverage is ${coverage}%, which is below the 50% threshold"
+            exit 1
+          else
+            echo "✅ Test coverage is ${coverage}% (above 50% threshold)"
+          fi
+
   lint:
     runs-on: ubuntu-latest
     steps:
